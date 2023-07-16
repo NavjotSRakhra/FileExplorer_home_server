@@ -24,7 +24,7 @@ public class FileSystem {
     private void initializeFilesAndDirectories() throws NotADirectoryException {
         File rootFileObject = new File(rootPath);
         if (rootFileObject.isFile() || !rootFileObject.exists())
-            throw new NotADirectoryException("The path \"" + rootFileObject.toPath().normalize() + "\" is not a path to a directory");
+            throw new NotADirectoryException("The path \"" + rootFileObject.toPath().normalize().toAbsolutePath() + "\" is not a path to a directory");
         for (File file : Objects.requireNonNull(rootFileObject.listFiles())) {
             if (file.isFile())
                 files.add(new io.github.navjotsrakhra.filedownloader.fileSys.organization.File(file.getName(), file.toPath().normalize().toAbsolutePath().toString()));

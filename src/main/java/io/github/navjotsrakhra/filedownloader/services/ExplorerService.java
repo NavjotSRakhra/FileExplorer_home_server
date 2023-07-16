@@ -26,11 +26,16 @@ public class ExplorerService {
     @Value(value = "${rootPath}")
     private String rootPath;
 
-    public ResponseEntity<?> handleFilesGetRequest(final String path, final String filePath, final String requestUriLocation) throws IOException, IllegalPathException, NotADirectoryException {
+    public ResponseEntity<?> handleFilesGetRequest(String path, String filePath, final String requestUriLocation) throws IOException, IllegalPathException, NotADirectoryException {
+        if (path != null) {
+            path = path.trim();
+        }
+        if (filePath != null) {
+            filePath = filePath.trim();
+        }
+
         checkValidPath(path);
         checkValidPath(filePath);
-
-        LOG.info("request path: '{}', request filePath: '{}'", path, filePath);
 
         if (filePath != null)
             return downloadFile(filePath);
@@ -38,9 +43,7 @@ public class ExplorerService {
             return getRecordOfFilesAndDirectoriesAt(path, requestUriLocation);
     }
 
-    private ResponseEntity<FilesAndDirectories> getRecordOfFilesAndDirectoriesAt(String pathToReadFrom, String requestUriLocation) throws IllegalPathException, NotADirectoryException {
-
-        LOG.info("request uri is '{}'", requestUriLocation);
+    private ResponseEntity<FilesAndDirectories> getRecordOfFilesAndDirectoriesAt(String pathToReadFrom, String requestUriLocation) throws NotADirectoryException {
 
         if (pathToReadFrom == null)
             pathToReadFrom = rootPath;
@@ -70,15 +73,14 @@ public class ExplorerService {
         if (!isPathAllowed(pathToReadFrom)) {
             LOG.warn("root path is '{}' and requested path is '{}'", rootPath, pathToReadFrom);
             LOG.error("Requested path '{}' is not present/not allowed", pathToReadFrom);
-            throw new IllegalPathException();
+            throw new IllegalPathException("The requested path is forbidden");
         }
     }
 
     private ResponseEntity<Resource> downloadFile(String downloadFilePath) throws IOException, IllegalPathException {
         Objects.requireNonNull(downloadFilePath);
-        LOG.info("requested file: '{}'", downloadFilePath);
         if (new java.io.File(downloadFilePath).isDirectory())
-            throw new IllegalPathException();
+            throw new IllegalPathException("The requested path is not a File");
         FileSystemResource resource = new FileSystemResource(downloadFilePath);
 
         return ResponseEntity

@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static io.github.navjotsrakhra.filedownloader.logging.LoggingController.LOG;
 
 @RestController
 @RequestMapping("/files")
@@ -24,13 +27,14 @@ public class DownloadPathController {
     }
 
     @ExceptionHandler({IllegalPathException.class, NotADirectoryException.class})
-    public ResponseEntity<?> handle() {
+    public ResponseEntity<?> handle(Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Illegal path");
+                .body(e.getMessage());
     }
 
     @GetMapping
     public ResponseEntity<?> getDownloadableFiles(@RequestParam(required = false) String path, @RequestParam(required = false) String filePath) throws NotADirectoryException, IllegalPathException, IOException {
+        LOG.info("[path: {}, filePath: {}], [binaryPath: {}, binaryFilePath: {}]", path, filePath, String.valueOf(path).getBytes(StandardCharsets.UTF_8), String.valueOf(filePath).getBytes(StandardCharsets.UTF_8));
         return explorerService.handleFilesGetRequest(path, filePath, ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/files");
     }
 
