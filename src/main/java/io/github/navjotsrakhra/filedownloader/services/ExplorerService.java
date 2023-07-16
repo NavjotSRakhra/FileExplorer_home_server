@@ -74,10 +74,11 @@ public class ExplorerService {
         }
     }
 
-    private ResponseEntity<Resource> downloadFile(String downloadFilePath) throws IOException {
+    private ResponseEntity<Resource> downloadFile(String downloadFilePath) throws IOException, IllegalPathException {
         Objects.requireNonNull(downloadFilePath);
         LOG.info("requested file: '{}'", downloadFilePath);
-
+        if (new java.io.File(downloadFilePath).isDirectory())
+            throw new IllegalPathException();
         FileSystemResource resource = new FileSystemResource(downloadFilePath);
 
         return ResponseEntity
