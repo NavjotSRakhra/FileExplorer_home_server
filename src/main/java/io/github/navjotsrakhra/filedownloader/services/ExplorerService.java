@@ -79,8 +79,12 @@ public class ExplorerService {
 
     private ResponseEntity<Resource> downloadFile(String downloadFilePath) throws IOException, IllegalPathException {
         Objects.requireNonNull(downloadFilePath);
-        if (new java.io.File(downloadFilePath).isDirectory())
+        var file = new java.io.File(downloadFilePath);
+        if (!file.exists())
+            throw new IllegalPathException("The requested path/file doesn't exist");
+        if (file.isDirectory())
             throw new IllegalPathException("The requested path is not a File");
+        
         FileSystemResource resource = new FileSystemResource(downloadFilePath);
 
         return ResponseEntity
