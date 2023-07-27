@@ -14,4 +14,9 @@ public class IndexController {
     public String upload() {
         return "uploadForm";
     }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 }

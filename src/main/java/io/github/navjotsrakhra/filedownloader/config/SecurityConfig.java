@@ -34,31 +34,19 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(
                         AbstractHttpConfigurer::disable
-                );
+                )
+                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
+                        .requestMatchers("/upload").hasRole("ADMIN")
+                        .requestMatchers("/login").permitAll()
+                        .anyRequest().authenticated())
+                .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer
+                        .loginPage("/login")
+                        .permitAll()
+                        .defaultSuccessUrl("/"))
+                .logout(httpSecurityLogoutConfigurer -> httpSecurityLogoutConfigurer
+                        .deleteCookies("JSESSIONID"));
         return httpSecurity.build();
     }
-
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(httpSecurityCsrfConfigurer -> {
-//                    try {
-//                        httpSecurityCsrfConfigurer.disable();
-//                    } catch (Exception e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                })
-//                .authorizeHttpRequests(new Customizer<AuthorizeHttpRequestsConfigurer<org.springframework.security.config.annotation.web.builders.HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>() {
-//                    @Override
-//                    public void customize(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorizationManagerRequestMatcherRegistry) {
-//                        authorizationManagerRequestMatcherRegistry
-//                                .requestMatchers("/login").permitAll()
-//                                .requestMatchers("/files/setDownloadRoot").hasRole("ADMIN")
-//                                .anyRequest().authenticated();
-//                    }
-//                });
-//        return http.build();
-//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
