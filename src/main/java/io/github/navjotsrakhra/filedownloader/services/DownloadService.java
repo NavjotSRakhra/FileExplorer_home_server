@@ -22,11 +22,12 @@ import java.util.Objects;
 import static io.github.navjotsrakhra.filedownloader.logging.LoggingController.LOG;
 
 @Service
-public class ExplorerService {
+public class DownloadService {
     @Value(value = "${rootPath}")
     private String rootPath;
 
     public ResponseEntity<?> handleFilesGetRequest(String path, String filePath, final String requestUriLocation) throws IOException, IllegalPathException, NotADirectoryException {
+        LOG.info("Root path: {}", rootPath);
         if (path != null) {
             path = path.trim();
         }
@@ -70,7 +71,7 @@ public class ExplorerService {
     private void checkValidPath(String pathToReadFrom) throws IllegalPathException {
         if (pathToReadFrom == null)
             return;
-        if (!isPathAllowed(pathToReadFrom)) {
+        if (!PathUtils.isChildOfPath(rootPath, pathToReadFrom)) {
             LOG.warn("root path is '{}' and requested path is '{}'", rootPath, pathToReadFrom);
             LOG.error("Requested path '{}' is not present/not allowed", pathToReadFrom);
             throw new IllegalPathException("The requested path is forbidden");
@@ -84,7 +85,7 @@ public class ExplorerService {
             throw new IllegalPathException("The requested path/file doesn't exist");
         if (file.isDirectory())
             throw new IllegalPathException("The requested path is not a File");
-        
+
         FileSystemResource resource = new FileSystemResource(downloadFilePath);
 
         return ResponseEntity
@@ -95,9 +96,17 @@ public class ExplorerService {
                 .body(resource);
     }
 
-    private boolean isPathAllowed(String path) {
-        return PathUtils.isChildOfPath(rootPath, path);
+    public void setRootPath(String newPath) throws IllegalPathException {
+        if (newPath == null)
+            throw new IllegalPathException("Path cannot be null.");
+
+        newPath = newPath.trim();
+
+        var file = new java.io.File(newPath);
+        if (!file.exists() || !file.isDirectory())
+            throw new IllegalPathException("Path must point to an existing directory.");
+
+        rootPath = newPath;
+        LOG.info(rootPath);
     }
-
-
 }
