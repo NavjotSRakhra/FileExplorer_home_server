@@ -15,7 +15,8 @@ FROM openjdk@sha256:9c484cfbe3cda24c78838da9ad333be25c1d3bcf4c9788b4f5cf34911c07
 
 WORKDIR /app
 
-COPY --from=build /app/target/classes/downloadRes ./classes/downloadRes
+COPY --from=build /app/target/classes ./classes
+RUN rm -rf ./classes/io
 COPY --from=build /app/target/*.jar app.jar
 
 ENV PORT=8080
