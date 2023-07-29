@@ -37,7 +37,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
                         .requestMatchers("/upload").hasRole("ADMIN")
-                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/login", "/img/lock-icon.png", "/img/user-icon.png").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer
                         .loginPage("/login")
