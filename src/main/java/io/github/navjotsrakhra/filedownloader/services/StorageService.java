@@ -2,13 +2,16 @@ package io.github.navjotsrakhra.filedownloader.services;
 
 import io.github.navjotsrakhra.filedownloader.exceptions.IllegalPathException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -20,6 +23,12 @@ import static io.github.navjotsrakhra.filedownloader.logging.LoggingController.L
 public class StorageService {
     @Value("${rootPathUpload}")
     private String rootPathUpload;
+
+    private static HttpHeaders redirectToHeader(CharSequence path) {
+        HttpHeaders header = new HttpHeaders();
+        header.setLocation(URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + path));
+        return header;
+    }
 
     public ResponseEntity<?> save(MultipartFile file) throws IOException {
 
@@ -35,9 +44,9 @@ public class StorageService {
             Files.copy(inputStream, Path.of(rootPathUpload).toAbsolutePath().normalize().resolve(Objects.requireNonNull(file.getOriginalFilename())), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        return ResponseEntity
-                .ok()
-                .body("File: " + file.getName() + " saved");
+        HttpHeaders header = redirectToHeader("/");
+
+        return new ResponseEntity<>(header, HttpStatus.SEE_OTHER);
     }
 
     public void setRootPath(String newPath) throws IllegalPathException {
